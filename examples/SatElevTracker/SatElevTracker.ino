@@ -36,7 +36,7 @@ void setup()
   Serial.begin(115200);
   ss.begin(GPSBaud);
 
-  Serial.println(F("ElevationTracker.ino"));
+  Serial.println(F("SatElevTracker.ino"));
   Serial.println(F("Displays GPS satellite elevations as they change"));
   Serial.print(F("Testing TinyGPS++ library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
   Serial.println(F("by Mikal Hart"));
@@ -109,8 +109,8 @@ void loop()
 
 void IntPrint(int n, int len)
 {
-  int digs = 1;
-  for (int i=10; i<=n; i*=10)
+  int digs = n < 0 ? 2 : 1;
+  for (int i=10; i<=abs(n); i*=10)
     ++digs;
   while (digs++ < len)
     Serial.print(F(" "));
@@ -120,16 +120,23 @@ void IntPrint(int n, int len)
 
 void TimePrint()
 {
-  if (gps.time.hour() < 10)
-    Serial.print(F("0"));
-  Serial.print(gps.time.hour());
-  Serial.print(F(":"));
-  if (gps.time.minute() < 10)
-    Serial.print(F("0"));
-  Serial.print(gps.time.minute());  
-  Serial.print(F(":"));
-  if (gps.time.second() < 10)
-    Serial.print(F("0"));
-  Serial.print(gps.time.second());
-  Serial.print(F(" "));
+  if (gps.time.isValid())
+  {
+    if (gps.time.hour() < 10)
+      Serial.print(F("0"));
+    Serial.print(gps.time.hour());
+    Serial.print(F(":"));
+    if (gps.time.minute() < 10)
+      Serial.print(F("0"));
+    Serial.print(gps.time.minute());
+    Serial.print(F(":"));
+    if (gps.time.second() < 10)
+      Serial.print(F("0"));
+    Serial.print(gps.time.second());
+    Serial.print(F(" "));
+  }
+  else
+  {
+    Serial.print(F("(unknown)"));
+  }
 }
