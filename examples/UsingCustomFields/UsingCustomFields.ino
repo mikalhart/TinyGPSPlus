@@ -62,20 +62,8 @@ void loop()
     Serial.print(F(" VDOP=")); Serial.print(vdop.value());
     Serial.print(F(" SATS=")); Serial.println(gps.satellites.value());
   }
-  smartDelay(1000);
 
-  if (millis() > 5000 && gps.charsProcessed() < 10)
-    Serial.println(F("No GPS data received: check wiring"));
+  while (ss.available() > 0)
+    gps.encode(ss.read());
 }
 
-// This custom version of delay() ensures that the gps object
-// is being "fed".
-static void smartDelay(unsigned long ms)
-{
-  unsigned long start = millis();
-  do 
-  {
-    while (ss.available())
-      gps.encode(ss.read());
-  } while (millis() - start < ms);
-}
