@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 #define _GPRMCterm   "GPRMC"
 #define _GPGGAterm   "GPGGA"
@@ -36,12 +37,12 @@ TinyGPSPlus::TinyGPSPlus()
   ,  curTermNumber(0)
   ,  curTermOffset(0)
   ,  gpsDataGood(false)
-  ,  customElts(0)
-  ,  customCandidate(0)
   ,  encodedCharCount(0)
   ,  goodSentenceCount(0)
   ,  failedChecksumCount(0)
   ,  passedChecksumCount(0)
+  ,  customElts(0)
+  ,  customCandidates(0)
 {
   term[0] = '\0';
 }
@@ -108,31 +109,29 @@ int TinyGPSPlus::fromHex(char a)
 }
 
 // static
-uint32_t TinyGPSPlus::parseDecimal(const char *term)
+// Parse a (potentially negative) number with up to 2 decimal digits -xxxx.yy
+int32_t TinyGPSPlus::parseDecimal(const char *term)
 {
   bool negative = *term == '-';
   if (negative) ++term;
-  unsigned long ret = 100UL * atol(term);
+  int32_t ret = 100 * (int32_t)atol(term);
   while (isdigit(*term)) ++term;
-  if (*term == '.')
+  if (*term == '.' && isdigit(term[1]))
   {
-    if (isdigit(term[1]))
-    {
-      ret += 10 * (term[1] - '0');
-      if (isdigit(term[2]))
-        ret += term[2] - '0';
-    }
+    ret += 10 * (term[1] - '0');
+    if (isdigit(term[2]))
+      ret += term[2] - '0';
   }
   return negative ? -ret : ret;
 }
 
 // static
+// Parse degress in that funny NMEA format DDMM.MMMM
 uint32_t TinyGPSPlus::parseDegrees(const char *term)
 {
   unsigned long leftOfDecimal = atol(term);
   unsigned long _100000thsOfMinute = (leftOfDecimal % 100UL) * 100000UL;
-  while (isdigit(*term))
-     ++term;
+  while (isdigit(*term)) ++term;
   if (*term == '.')
   {
     unsigned long mult = 10000;
@@ -182,7 +181,7 @@ bool TinyGPSPlus::endOfTermHandler()
       }
 
       // Commit all custom listeners of this sentence type
-      for (TinyGPSCustom *p = customCandidate; p != NULL && strcmp(p->sentenceName, customCandidate->sentenceName) == 0; p = p->next)
+      for (TinyGPSCustom *p = customCandidates; p != NULL && strcmp(p->sentenceName, customCandidates->sentenceName) == 0; p = p->next)
          p->commit();
       return true;
     }
@@ -206,9 +205,9 @@ bool TinyGPSPlus::endOfTermHandler()
       curSentenceType = GPS_SENTENCE_OTHER;
 
     // Any custom candidates of this sentence type?
-    for (customCandidate = customElts; customCandidate != NULL && strcmp(customCandidate->sentenceName, term) < 0; customCandidate = customCandidate->next);
-    if (customCandidate != NULL && strcmp(customCandidate->sentenceName, term) > 0)
-       customCandidate = NULL;
+    for (customCandidates = customElts; customCandidates != NULL && strcmp(customCandidates->sentenceName, term) < 0; customCandidates = customCandidates->next);
+    if (customCandidates != NULL && strcmp(customCandidates->sentenceName, term) > 0)
+       customCandidates = NULL;
 
     return false;
   }
@@ -263,13 +262,11 @@ bool TinyGPSPlus::endOfTermHandler()
       altitude.set(term);
       break;
   }
-  else if(customCandidate)
-  {
-    // Set custom values as needed
-    for (TinyGPSCustom *p = customCandidate; strcmp(p->sentenceName, customCandidate->sentenceName) == 0 && p->termNumber <= curTermNumber; p = p->next)
-      if (p->termNumber == curTermNumber)
-        p->set(term);
-  }
+
+  // Set custom values as needed
+  for (TinyGPSCustom *p = customCandidates; p != NULL && strcmp(p->sentenceName, customCandidates->sentenceName) == 0 && p->termNumber <= curTermNumber; p = p->next)
+    if (p->termNumber == curTermNumber)
+         p->set(term);
 
   return false;
 }
@@ -374,7 +371,7 @@ void TinyGPSTime::commit()
 
 void TinyGPSTime::setTime(const char *term)
 {
-   newTime = TinyGPSPlus::parseDecimal(term);
+   newTime = (uint32_t)TinyGPSPlus::parseDecimal(term);
 }
 
 void TinyGPSDate::setDate(const char *term)

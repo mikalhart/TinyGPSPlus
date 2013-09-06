@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #else
 #include "WProgram.h"
 #endif
-#include <limits>
+#include <limits.h>
 
 #define _GPS_VERSION 1 // software version of this library
 #define _GPS_MPH_PER_KNOT 1.15077945
@@ -61,7 +61,7 @@ struct TinyGPSLocation
 public:
    bool isValid() const    { return valid; }
    bool isUpdated() const  { return updated; }
-   uint32_t age() const    { return valid ? millis() - lastCommitTime : std::numeric_limits<uint32_t>::max(); }
+   uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
 
    int32_t rawLat()        { updated = false; return ilat; }
    int32_t rawLng()        { updated = false; return ilng; }
@@ -86,7 +86,7 @@ struct TinyGPSDate
 public:
    bool isValid() const       { return valid; }
    bool isUpdated() const     { return updated; }
-   uint32_t age() const       { return valid ? millis() - lastCommitTime : std::numeric_limits<uint32_t>::max(); }
+   uint32_t age() const       { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
 
    uint32_t value()           { updated = false; return date; }
    uint16_t year();
@@ -110,7 +110,7 @@ struct TinyGPSTime
 public:
    bool isValid() const       { return valid; }
    bool isUpdated() const     { return updated; }
-   uint32_t age() const       { return valid ? millis() - lastCommitTime : std::numeric_limits<uint32_t>::max(); }
+   uint32_t age() const       { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
 
    uint32_t value()           { updated = false; return time; }
    uint8_t hour();
@@ -135,8 +135,8 @@ struct TinyGPSDecimal
 public:
    bool isValid() const    { return valid; }
    bool isUpdated() const  { return updated; }
-   uint32_t age() const    { return valid ? millis() - lastCommitTime : std::numeric_limits<uint32_t>::max(); }
-   uint32_t value()        { updated = false; return val; }
+   uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
+   int32_t value()         { updated = false; return val; }
 
    TinyGPSDecimal() : valid(false), updated(false), val(0)
    {}
@@ -144,7 +144,7 @@ public:
 private:
    bool valid, updated;
    uint32_t lastCommitTime;
-   uint32_t val, newval;
+   int32_t val, newval;
    void commit();
    void set(const char *term);
 };
@@ -155,7 +155,7 @@ struct TinyGPSInteger
 public:
    bool isValid() const    { return valid; }
    bool isUpdated() const  { return updated; }
-   uint32_t age() const    { return valid ? millis() - lastCommitTime : std::numeric_limits<uint32_t>::max(); }
+   uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
    uint32_t value()        { updated = false; return val; }
 
    TinyGPSInteger() : valid(false), updated(false), val(0)
@@ -200,7 +200,7 @@ public:
 
    bool isUpdated() const  { return updated; }
    bool isValid() const    { return valid; }
-   uint32_t age() const    { return valid ? millis() - lastCommitTime : std::numeric_limits<uint32_t>::max(); }
+   uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
    const char *value()     { updated = false; return buffer; }
 
 private:
@@ -239,7 +239,7 @@ public:
   static double courseTo(double lat1, double long1, double lat2, double long2);
   static const char *cardinal(double course);
 
-  static uint32_t parseDecimal(const char *term);
+  static int32_t parseDecimal(const char *term);
   static uint32_t parseDegrees(const char *term);
 
   uint32_t charsProcessed() const { return encodedCharCount; }
@@ -262,7 +262,7 @@ private:
   // custom element support
   friend class TinyGPSCustom;
   TinyGPSCustom *customElts;
-  TinyGPSCustom *customCandidate;
+  TinyGPSCustom *customCandidates;
   void insertCustom(TinyGPSCustom *pElt, const char *sentenceName, int index);
 
   // statistics
