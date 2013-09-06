@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #else
 #include "WProgram.h"
 #endif
-#include <limits.h>
+#include <limits>
 
 #define _GPS_VERSION 1 // software version of this library
 #define _GPS_MPH_PER_KNOT 1.15077945
@@ -48,7 +48,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
    Longitude   i32     dmill     GPRMC.5/6 or GPGGA.4/5   Degrees (E/W)
    Speed       u32     kn100     GPRMC.7                  Decimal
    Course      u32     deg100    GPRMC.8                  Decimal
-   Date        u32     ddmmyy    GPRMC.9                  
+   Date        u32     ddmmyy    GPRMC.9
    FixValid    bool    isgood    GPGGA.6                  > '0'
    Satellites  u8      sats      GPGGA.7                  Decimal
    HDOP        u32     hdop100   GPGGA.8                  Decimal
@@ -61,7 +61,7 @@ struct TinyGPSLocation
 public:
    bool isValid() const    { return valid; }
    bool isUpdated() const  { return updated; }
-   uint32_t age() const    { return valid ? millis() - lastCommitTime : ULONG_MAX; }
+   uint32_t age() const    { return valid ? millis() - lastCommitTime : std::numeric_limits<uint32_t>::max(); }
 
    int32_t rawLat()        { updated = false; return ilat; }
    int32_t rawLng()        { updated = false; return ilng; }
@@ -86,7 +86,7 @@ struct TinyGPSDate
 public:
    bool isValid() const       { return valid; }
    bool isUpdated() const     { return updated; }
-   uint32_t age() const       { return valid ? millis() - lastCommitTime : ULONG_MAX; }
+   uint32_t age() const       { return valid ? millis() - lastCommitTime : std::numeric_limits<uint32_t>::max(); }
 
    uint32_t value()           { updated = false; return date; }
    uint16_t year();
@@ -110,7 +110,7 @@ struct TinyGPSTime
 public:
    bool isValid() const       { return valid; }
    bool isUpdated() const     { return updated; }
-   uint32_t age() const       { return valid ? millis() - lastCommitTime : ULONG_MAX; }
+   uint32_t age() const       { return valid ? millis() - lastCommitTime : std::numeric_limits<uint32_t>::max(); }
 
    uint32_t value()           { updated = false; return time; }
    uint8_t hour();
@@ -135,7 +135,7 @@ struct TinyGPSDecimal
 public:
    bool isValid() const    { return valid; }
    bool isUpdated() const  { return updated; }
-   uint32_t age() const    { return valid ? millis() - lastCommitTime : ULONG_MAX; }
+   uint32_t age() const    { return valid ? millis() - lastCommitTime : std::numeric_limits<uint32_t>::max(); }
    uint32_t value()        { updated = false; return val; }
 
    TinyGPSDecimal() : valid(false), updated(false), val(0)
@@ -155,7 +155,7 @@ struct TinyGPSInteger
 public:
    bool isValid() const    { return valid; }
    bool isUpdated() const  { return updated; }
-   uint32_t age() const    { return valid ? millis() - lastCommitTime : ULONG_MAX; }
+   uint32_t age() const    { return valid ? millis() - lastCommitTime : std::numeric_limits<uint32_t>::max(); }
    uint32_t value()        { updated = false; return val; }
 
    TinyGPSInteger() : valid(false), updated(false), val(0)
@@ -200,7 +200,7 @@ public:
 
    bool isUpdated() const  { return updated; }
    bool isValid() const    { return valid; }
-   uint32_t age() const    { return valid ? millis() - lastCommitTime : ULONG_MAX; }
+   uint32_t age() const    { return valid ? millis() - lastCommitTime : std::numeric_limits<uint32_t>::max(); }
    const char *value()     { updated = false; return buffer; }
 
 private:
