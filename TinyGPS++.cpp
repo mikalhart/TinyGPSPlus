@@ -1,8 +1,8 @@
 /*
 TinyGPS++ - a small GPS library for Arduino providing universal NMEA parsing
-Based on work by and "distance_to" and "course_to" courtesy of Maarten Lamers.
-Suggestion to add satellites(), course_to(), and cardinal(), by Matt Monson.
-Location recision improvements suggested by Wayne Holder.
+Based on work by and "distanceBetween" and "courseTo" courtesy of Maarten Lamers.
+Suggestion to add satellites, courseTo(), and cardinal(), by Matt Monson.
+Location precision improvements suggested by Wayne Holder.
 Copyright (C) 2008-2013 Mikal Hart
 All rights reserved.
 
@@ -126,7 +126,7 @@ int32_t TinyGPSPlus::parseDecimal(const char *term)
 }
 
 // static
-// Parse degress in that funny NMEA format DDMM.MMMM
+// Parse degrees in that funny NMEA format DDMM.MMMM
 uint32_t TinyGPSPlus::parseDegrees(const char *term)
 {
   unsigned long leftOfDecimal = atol(term);
