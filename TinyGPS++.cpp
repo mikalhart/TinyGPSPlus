@@ -23,6 +23,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "TinyGPS++.h"
 
+#include <string.h>
+#include <ctype.h>
+
 #define _GPRMCterm   "GPRMC"
 #define _GPGGAterm   "GPGGA"
 
@@ -33,12 +36,12 @@ TinyGPSPlus::TinyGPSPlus()
   ,  curTermNumber(0)
   ,  curTermOffset(0)
   ,  gpsDataGood(false)
+  ,  customElts(0)
+  ,  customCandidate(0)
   ,  encodedCharCount(0)
   ,  goodSentenceCount(0)
   ,  failedChecksumCount(0)
   ,  passedChecksumCount(0)
-  ,  customElts(0)
-  ,  customCandidate(0)
 {
   term[0] = '\0';
 }
@@ -94,7 +97,7 @@ bool TinyGPSPlus::encode(char c)
 //
 // internal utilities
 //
-int TinyGPSPlus::fromHex(char a) 
+int TinyGPSPlus::fromHex(char a)
 {
   if (a >= 'A' && a <= 'F')
     return a - 'A' + 10;
@@ -124,7 +127,7 @@ uint32_t TinyGPSPlus::parseDecimal(const char *term)
 }
 
 // static
-unsigned long TinyGPSPlus::parseDegrees(const char *term)
+uint32_t TinyGPSPlus::parseDegrees(const char *term)
 {
   unsigned long leftOfDecimal = atol(term);
   unsigned long _100000thsOfMinute = (leftOfDecimal % 100UL) * 100000UL;
@@ -270,10 +273,10 @@ bool TinyGPSPlus::endOfTermHandler()
 }
 
 /* static */
-double TinyGPSPlus::distanceBetween(double lat1, double long1, double lat2, double long2) 
+double TinyGPSPlus::distanceBetween(double lat1, double long1, double lat2, double long2)
 {
-  // returns distance in meters between two positions, both specified 
-  // as signed decimal-degrees latitude and longitude. Uses great-circle 
+  // returns distance in meters between two positions, both specified
+  // as signed decimal-degrees latitude and longitude. Uses great-circle
   // distance computation for hypothetical sphere of radius 6372795 meters.
   // Because Earth is no exact sphere, rounding errors may be up to 0.5%.
   // Courtesy of Maarten Lamers
@@ -286,16 +289,16 @@ double TinyGPSPlus::distanceBetween(double lat1, double long1, double lat2, doub
   double clat1 = cos(lat1);
   double slat2 = sin(lat2);
   double clat2 = cos(lat2);
-  delta = (clat1 * slat2) - (slat1 * clat2 * cdlong); 
-  delta = sq(delta); 
-  delta += sq(clat2 * sdlong); 
-  delta = sqrt(delta); 
-  double denom = (slat1 * slat2) + (clat1 * clat2 * cdlong); 
-  delta = atan2(delta, denom); 
-  return delta * 6372795; 
+  delta = (clat1 * slat2) - (slat1 * clat2 * cdlong);
+  delta = sq(delta);
+  delta += sq(clat2 * sdlong);
+  delta = sqrt(delta);
+  double denom = (slat1 * slat2) + (clat1 * clat2 * cdlong);
+  delta = atan2(delta, denom);
+  return delta * 6372795;
 }
 
-double TinyGPSPlus::courseTo(double lat1, double long1, double lat2, double long2) 
+double TinyGPSPlus::courseTo(double lat1, double long1, double lat2, double long2)
 {
   // returns course in degrees (North=0, West=270) from position 1 to position 2,
   // both specified as signed decimal-degrees latitude and longitude.
