@@ -263,11 +263,13 @@ bool TinyGPSPlus::endOfTermHandler()
       altitude.set(term);
       break;
   }
-
-  // Set custom values as needed
-  for (TinyGPSCustom *p = customCandidate; strcmp(p->sentenceName, customCandidate->sentenceName) == 0 && p->termNumber <= curTermNumber; p = p->next)
-    if (p->termNumber == curTermNumber)
-      p->set(term);
+  else if(customCandidate)
+  {
+    // Set custom values as needed
+    for (TinyGPSCustom *p = customCandidate; strcmp(p->sentenceName, customCandidate->sentenceName) == 0 && p->termNumber <= curTermNumber; p = p->next)
+      if (p->termNumber == curTermNumber)
+        p->set(term);
+  }
 
   return false;
 }
