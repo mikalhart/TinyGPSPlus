@@ -37,12 +37,12 @@ TinyGPSPlus::TinyGPSPlus()
   ,  curTermNumber(0)
   ,  curTermOffset(0)
   ,  gpsDataGood(false)
-  ,  customElts(0)
-  ,  customCandidates(0)
   ,  encodedCharCount(0)
   ,  goodSentenceCount(0)
   ,  failedChecksumCount(0)
   ,  passedChecksumCount(0)
+  ,  customElts(0)
+  ,  customCandidates(0)
 {
   term[0] = '\0';
 }
