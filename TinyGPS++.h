@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 #include <limits.h>
 
-#define _GPS_VERSION 1 // software version of this library
+#define _GPS_VERSION "0.92" // software version of this library
 #define _GPS_MPH_PER_KNOT 1.15077945
 #define _GPS_MPS_PER_KNOT 0.51444444
 #define _GPS_KMPH_PER_KNOT 1.852
@@ -39,21 +39,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define _GPS_KM_PER_METER 0.001
 #define _GPS_FEET_PER_METER 3.2808399
 #define _GPS_MAX_FIELD_SIZE 15
-/*
-   Field       Type    Format    Source                   Notes
-   -----       ----    ------    ------                   -----
-   Time        u32     hhmmsscc  GPRMC.1 OR GPGGA.1       Decimal
-   RmcValid    bool    isvalid   GPRMC.2                  =='A'
-   Latitude:   i32     dmill     GPRMC.3/4 OR GPGGA 2/3   Degrees (N/S)
-   Longitude   i32     dmill     GPRMC.5/6 or GPGGA.4/5   Degrees (E/W)
-   Speed       u32     kn100     GPRMC.7                  Decimal
-   Course      u32     deg100    GPRMC.8                  Decimal
-   Date        u32     ddmmyy    GPRMC.9
-   FixValid    bool    isgood    GPGGA.6                  > '0'
-   Satellites  u8      sats      GPGGA.7                  Decimal
-   HDOP        u32     hdop100   GPGGA.8                  Decimal
-   Altitude    i32     cm        GPGGA.9                  Decimal
-*/
 
 struct TinyGPSLocation
 {
@@ -63,17 +48,21 @@ public:
    bool isUpdated() const  { return updated; }
    uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
 
-   int32_t rawLat()        { updated = false; return ilat; }
-   int32_t rawLng()        { updated = false; return ilng; }
-   double  lat();
-   double  lng();
+   int16_t rawLatDegrees()     { updated = false; return iLatDegrees; }
+   int16_t rawLngDegrees()     { updated = false; return iLngDegrees; }
+   uint32_t rawLatBillionths() { updated = false; return uLatBillionths; }
+   uint32_t rawLngBillionths() { updated = false; return uLngBillionths; }
+   double lat();
+   double lng();
 
-   TinyGPSLocation() : valid(false), updated(false), ilat(0), ilng(0)
+   TinyGPSLocation() : valid(false), updated(false), 
+      iLatDegrees(0), iLngDegrees(0), uLatBillionths(0), uLngBillionths(0)
    {}
 
 private:
    bool valid, updated;
-   int32_t ilat, newlat, ilng, newlng;
+   int16_t iLatDegrees, iNewLatDegrees, iLngDegrees, iNewLngDegrees;
+   uint32_t uLatBillionths, uNewLatBillionths, uLngBillionths, uNewLngBillionths;
    uint32_t lastCommitTime;
    void commit();
    void setLatitude(const char *term);
@@ -233,19 +222,19 @@ public:
   TinyGPSInteger satellites;
   TinyGPSDecimal hdop;
 
-  static int libraryVersion() { return _GPS_VERSION; }
+  static const char *libraryVersion() { return _GPS_VERSION; }
 
   static double distanceBetween(double lat1, double long1, double lat2, double long2);
   static double courseTo(double lat1, double long1, double lat2, double long2);
   static const char *cardinal(double course);
 
   static int32_t parseDecimal(const char *term);
-  static uint32_t parseDegrees(const char *term);
+  static void parseDegrees(const char *term, int16_t &degrees, uint32_t &billionths);
 
-  uint32_t charsProcessed() const { return encodedCharCount; }
-  uint32_t goodSentences()  const { return goodSentenceCount; }
-  uint32_t failedChecksum() const { return failedChecksumCount; }
-  uint32_t passedChecksum() const { return passedChecksumCount; }
+  uint32_t charsProcessed()   const { return encodedCharCount; }
+  uint32_t sentencesWithFix() const { return sentencesWithFixCount; }
+  uint32_t failedChecksum()   const { return failedChecksumCount; }
+  uint32_t passedChecksum()   const { return passedChecksumCount; }
 
 private:
   enum {GPS_SENTENCE_GPGGA, GPS_SENTENCE_GPRMC, GPS_SENTENCE_OTHER};
@@ -257,7 +246,7 @@ private:
   uint8_t curSentenceType;
   uint8_t curTermNumber;
   uint8_t curTermOffset;
-  bool gpsDataGood;
+  bool sentenceHasFix;
 
   // custom element support
   friend class TinyGPSCustom;
@@ -267,7 +256,7 @@ private:
 
   // statistics
   uint32_t encodedCharCount;
-  uint32_t goodSentenceCount;
+  uint32_t sentencesWithFixCount;
   uint32_t failedChecksumCount;
   uint32_t passedChecksumCount;
 

@@ -66,7 +66,7 @@ void loop()
   printStr(gps.location.isValid() ? cardinalToLondon : "*** ", 6);
 
   printInt(gps.charsProcessed(), true, 6);
-  printInt(gps.goodSentences(), true, 10);
+  printInt(gps.sentencesWithFix(), true, 10);
   printInt(gps.failedChecksum(), true, 9);
   Serial.println();
   
