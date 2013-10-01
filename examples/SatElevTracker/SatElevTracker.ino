@@ -12,6 +12,7 @@
 static const int RXPin = 4, TXPin = 3;
 static const int GPSBaud = 4800;
 static const int MAX_SATELLITES = 40;
+static const int PAGE_LENGTH = 40;
 
 // The TinyGPS++ object
 TinyGPSPlus gps;
@@ -24,6 +25,7 @@ TinyGPSCustom messageNumber(gps, "GPGSV", 2);      // $GPGSV sentence, second el
 TinyGPSCustom satNumber[4]; // to be initialized later
 TinyGPSCustom elevation[4];
 bool anyChanges = false;
+unsigned long linecount = 0;
 
 struct
 {
@@ -48,18 +50,6 @@ void setup()
     satNumber[i].begin(gps, "GPGSV", 4 + 4 * i); // offsets 4, 8, 12, 16
     elevation[i].begin(gps, "GPGSV", 5 + 4 * i); // offsets 5, 9, 13, 17
   }
-  
-  Serial.print(F("Time     "));
-  for (int i=0; i<MAX_SATELLITES; ++i)
-  {
-    Serial.print(F(" "));
-    IntPrint(i+1, 2);
-  }
-  Serial.println();
-  Serial.print(F("---------"));
-  for (int i=0; i<MAX_SATELLITES; ++i)
-    Serial.print(F("----"));
-  Serial.println();
 }
 
 void loop()
@@ -90,6 +80,8 @@ void loop()
       int currentMessage = atoi(messageNumber.value());
       if (totalMessages == currentMessage && anyChanges)
       {
+        if (linecount++ % PAGE_LENGTH == 0)
+          printHeader();
         TimePrint();
         for (int i=0; i<MAX_SATELLITES; ++i)
         {
@@ -139,4 +131,20 @@ void TimePrint()
   {
     Serial.print(F("(unknown)"));
   }
+}
+
+void printHeader()
+{
+  Serial.println();
+  Serial.print(F("Time     "));
+  for (int i=0; i<MAX_SATELLITES; ++i)
+  {
+    Serial.print(F(" "));
+    IntPrint(i+1, 2);
+  }
+  Serial.println();
+  Serial.print(F("---------"));
+  for (int i=0; i<MAX_SATELLITES; ++i)
+    Serial.print(F("----"));
+  Serial.println();
 }

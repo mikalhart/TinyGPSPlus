@@ -40,10 +40,14 @@ void loop()
     Serial.print(F("LOCATION   Fix Age="));
     Serial.print(gps.location.age());
     Serial.print(F("ms Raw Lat="));
-    Serial.print(gps.location.rawLat());
-    Serial.print(F(" Raw Long="));
-    Serial.print(gps.location.rawLng());
-    Serial.print(F(" Lat="));
+    Serial.print(gps.location.rawLatDegrees());
+    Serial.print(" and ");
+    Serial.print(gps.location.rawLatBillionths());
+    Serial.print(F(" billionths,  Raw Long="));
+    Serial.print(gps.location.rawLngDegrees());
+    Serial.print(".");
+    Serial.print(gps.location.rawLngBillionths());
+    Serial.print(F(" billionths,  Lat="));
     Serial.print(gps.location.lat(), 6);
     Serial.print(F(" Long="));
     Serial.println(gps.location.lng(), 6);
@@ -167,8 +171,8 @@ void loop()
 
     Serial.print(F("DIAGS      Chars="));
     Serial.print(gps.charsProcessed());
-    Serial.print(F(" Good-sentences="));
-    Serial.print(gps.goodSentences());
+    Serial.print(F(" Sentences-with-Fix="));
+    Serial.print(gps.sentencesWithFix());
     Serial.print(F(" Failed-checksum="));
     Serial.print(gps.failedChecksum());
     Serial.print(F(" Passed-checksum="));

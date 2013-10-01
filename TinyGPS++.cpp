@@ -36,11 +36,11 @@ TinyGPSPlus::TinyGPSPlus()
   ,  curSentenceType(GPS_SENTENCE_OTHER)
   ,  curTermNumber(0)
   ,  curTermOffset(0)
-  ,  gpsDataGood(false)
+  ,  sentenceHasFix(false)
   ,  customElts(0)
   ,  customCandidates(0)
   ,  encodedCharCount(0)
-  ,  goodSentenceCount(0)
+  ,  sentencesWithFixCount(0)
   ,  failedChecksumCount(0)
   ,  passedChecksumCount(0)
 {
@@ -81,7 +81,7 @@ bool TinyGPSPlus::encode(char c)
     parity = 0;
     curSentenceType = GPS_SENTENCE_OTHER;
     isChecksumTerm = false;
-    gpsDataGood = false;
+    sentenceHasFix = false;
     return false;
 
   default: // ordinary characters
@@ -127,21 +127,26 @@ int32_t TinyGPSPlus::parseDecimal(const char *term)
 
 // static
 // Parse degrees in that funny NMEA format DDMM.MMMM
-uint32_t TinyGPSPlus::parseDegrees(const char *term)
+void TinyGPSPlus::parseDegrees(const char *term, int16_t &degrees, uint32_t &billionths)
 {
-  unsigned long leftOfDecimal = atol(term);
-  unsigned long _100000thsOfMinute = (leftOfDecimal % 100UL) * 100000UL;
-  while (isdigit(*term)) ++term;
+  uint32_t leftOfDecimal = (uint32_t)atol(term);
+  uint16_t minutes = (uint16_t)(leftOfDecimal % 100);
+  uint32_t multiplier = 10000000UL;
+  uint32_t tenMillionthsOfMinutes = minutes * multiplier;
+
+  degrees = (int16_t)(leftOfDecimal / 100);
+
+  while (isdigit(*term))
+    ++term;
+
   if (*term == '.')
-  {
-    unsigned long mult = 10000;
     while (isdigit(*++term))
     {
-      _100000thsOfMinute += mult * (*term - '0');
-      mult /= 10;
+      multiplier /= 10;
+      tenMillionthsOfMinutes += (*term - '0') * multiplier;
     }
-  }
-  return (leftOfDecimal / 100) * 1000000 + (_100000thsOfMinute + 3) / 6;
+
+  billionths = (5 * tenMillionthsOfMinutes + 1) / 3;
 }
 
 #define COMBINE(sentence_type, term_number) (((unsigned)(sentence_type) << 5) | term_number)
@@ -150,34 +155,38 @@ uint32_t TinyGPSPlus::parseDegrees(const char *term)
 // Returns true if new sentence has just passed checksum test and is validated
 bool TinyGPSPlus::endOfTermHandler()
 {
-  // If it's the checksum term, and the checksum checks out and it's got "good" data, then commit it
+  // If it's the checksum term, and the checksum checks out, commit
   if (isChecksumTerm)
   {
     byte checksum = 16 * fromHex(term[0]) + fromHex(term[1]);
     if (checksum == parity)
     {
       passedChecksumCount++;
-      if (gpsDataGood)
-      {
-        ++goodSentenceCount;
+      if (sentenceHasFix)
+        ++sentencesWithFixCount;
 
-        switch(curSentenceType)
+      switch(curSentenceType)
+      {
+      case GPS_SENTENCE_GPRMC:
+        date.commit();
+        time.commit();
+        if (sentenceHasFix)
         {
-        case GPS_SENTENCE_GPRMC:
-           date.commit();
-           time.commit();
            location.commit();
            speed.commit();
            course.commit();
-          break;
-        case GPS_SENTENCE_GPGGA:
-           time.commit();
-           location.commit();
-           altitude.commit();
-           satellites.commit();
-           hdop.commit();
-          break;
         }
+        break;
+      case GPS_SENTENCE_GPGGA:
+        time.commit();
+        if (sentenceHasFix)
+        {
+          location.commit();
+          altitude.commit();
+        }
+        satellites.commit();
+        hdop.commit();
+        break;
       }
 
       // Commit all custom listeners of this sentence type
@@ -220,7 +229,7 @@ bool TinyGPSPlus::endOfTermHandler()
       time.setTime(term);
       break;
     case COMBINE(GPS_SENTENCE_GPRMC, 2): // GPRMC validity
-      gpsDataGood = term[0] == 'A';
+      sentenceHasFix = term[0] == 'A';
       break;
     case COMBINE(GPS_SENTENCE_GPRMC, 3): // Latitude
     case COMBINE(GPS_SENTENCE_GPGGA, 2):
@@ -229,7 +238,7 @@ bool TinyGPSPlus::endOfTermHandler()
     case COMBINE(GPS_SENTENCE_GPRMC, 4): // N/S
     case COMBINE(GPS_SENTENCE_GPGGA, 3):
       if (term[0] == 'S')
-        location.newlat = -location.newlat;
+        location.iNewLatDegrees = -location.iNewLatDegrees;
       break;
     case COMBINE(GPS_SENTENCE_GPRMC, 5): // Longitude
     case COMBINE(GPS_SENTENCE_GPGGA, 4):
@@ -238,7 +247,7 @@ bool TinyGPSPlus::endOfTermHandler()
     case COMBINE(GPS_SENTENCE_GPRMC, 6): // E/W
     case COMBINE(GPS_SENTENCE_GPGGA, 5):
       if (term[0] == 'W')
-        location.newlng = -location.newlng;
+        location.iNewLngDegrees = -location.iNewLngDegrees;
       break;
     case COMBINE(GPS_SENTENCE_GPRMC, 7): // Speed (GPRMC)
       speed.set(term);
@@ -250,7 +259,7 @@ bool TinyGPSPlus::endOfTermHandler()
       date.setDate(term);
       break;
     case COMBINE(GPS_SENTENCE_GPGGA, 6): // Fix data (GPGGA)
-      gpsDataGood = term[0] > '0';
+      sentenceHasFix = term[0] > '0';
       break;
     case COMBINE(GPS_SENTENCE_GPGGA, 7): // Satellites used (GPGGA)
       satellites.set(term);
@@ -320,39 +329,44 @@ double TinyGPSPlus::courseTo(double lat1, double long1, double lat2, double long
 const char *TinyGPSPlus::cardinal(double course)
 {
   static const char* directions[] = {"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"};
-
   int direction = (int)((course + 11.25f) / 22.5f);
   return directions[direction % 16];
 }
 
 void TinyGPSLocation::commit()
 {
-   ilat = newlat;
-   ilng = newlng;
+   iLatDegrees = iNewLatDegrees;
+   uLatBillionths = uNewLatBillionths;
+   iLngDegrees = iNewLngDegrees;
+   uLngBillionths = uNewLngBillionths;
    lastCommitTime = millis();
    valid = updated = true;
 }
 
 void TinyGPSLocation::setLatitude(const char *term)
 {
-   newlat = TinyGPSPlus::parseDegrees(term);
+   TinyGPSPlus::parseDegrees(term, iNewLatDegrees, uNewLatBillionths);
 }
 
 void TinyGPSLocation::setLongitude(const char *term)
 {
-   newlng = TinyGPSPlus::parseDegrees(term);
+   TinyGPSPlus::parseDegrees(term, iNewLngDegrees, uNewLngBillionths);
 }
 
 double TinyGPSLocation::lat()
 {
    updated = false;
-   return ilat / 1000000.0;
+   return iLatDegrees > 0 ? 
+      (iLatDegrees + uLatBillionths / 1000000000.0) :
+      (iLatDegrees - uLatBillionths / 1000000000.0);
 }
 
 double TinyGPSLocation::lng()
 {
    updated = false;
-   return ilng / 1000000.0;
+   return iLngDegrees > 0 ? 
+      (iLngDegrees + uLngBillionths / 1000000000.0) :
+      (iLngDegrees - uLngBillionths / 1000000000.0);
 }
 
 void TinyGPSDate::commit()
