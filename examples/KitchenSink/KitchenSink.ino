@@ -95,7 +95,7 @@ void loop()
     Serial.print(gps.speed.mph());
     Serial.print(F(" m/s="));
     Serial.print(gps.speed.mps());
-    Serial.print(F(" km/s="));
+    Serial.print(F(" km/h="));
     Serial.println(gps.speed.kmph());
   }
 
