@@ -41,13 +41,13 @@ void loop()
     Serial.print(gps.location.age());
     Serial.print(F("ms Raw Lat="));
     Serial.print(gps.location.rawLatDegrees());
-    Serial.print(" and ");
+    Serial.print("[+");
     Serial.print(gps.location.rawLatBillionths());
-    Serial.print(F(" billionths,  Raw Long="));
+    Serial.print(F(" billionths],  Raw Long="));
     Serial.print(gps.location.rawLngDegrees());
-    Serial.print(".");
+    Serial.print("[+");
     Serial.print(gps.location.rawLngBillionths());
-    Serial.print(F(" billionths,  Lat="));
+    Serial.print(F(" billionths],  Lat="));
     Serial.print(gps.location.lat(), 6);
     Serial.print(F(" Long="));
     Serial.println(gps.location.lng(), 6);
