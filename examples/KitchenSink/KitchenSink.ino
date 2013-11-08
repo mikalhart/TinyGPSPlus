@@ -6,7 +6,7 @@
    4800-baud serial GPS device hooked up on pins 4(rx) and 3(tx).
 */
 static const int RXPin = 4, TXPin = 3;
-static const int GPSBaud = 4800;
+static const unsigned long GPSBaud = 4800;
 
 // The TinyGPS++ object
 TinyGPSPlus gps;
@@ -85,7 +85,7 @@ void loop()
 
   else if (gps.speed.isUpdated())
   {
-    Serial.print(F("SPEED      Fix Age="));
+    Serial.print(F("SPEED      Fix Age=%ulms Raw=%ul Knots=%f MPH=%f m/s=%f km/h=%f"));
     Serial.print(gps.speed.age());
     Serial.print(F("ms Raw="));
     Serial.print(gps.speed.value());
