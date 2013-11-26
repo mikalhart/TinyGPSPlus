@@ -43,12 +43,12 @@ void loop()
     Serial.print(gps.location.rawLat().negative ? "-" : "+");
     Serial.print(gps.location.rawLat().deg);
     Serial.print("[+");
-    Serial.print(gps.location.rawLat().billionths());
+    Serial.print(gps.location.rawLat().billionths);
     Serial.print(F(" billionths],  Raw Long="));
     Serial.print(gps.location.rawLng().negative ? "-" : "+");
     Serial.print(gps.location.rawLng().deg);
     Serial.print("[+");
-    Serial.print(gps.location.rawLng().billionths());
+    Serial.print(gps.location.rawLng().billionths);
     Serial.print(F(" billionths],  Lat="));
     Serial.print(gps.location.lat(), 6);
     Serial.print(F(" Long="));
