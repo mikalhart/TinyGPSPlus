@@ -40,6 +40,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define _GPS_FEET_PER_METER 3.2808399
 #define _GPS_MAX_FIELD_SIZE 15
 
+struct RawDegrees
+{
+   uint16_t deg;
+   uint32_t billionths;
+   bool negative;
+public:
+   RawDegrees() : deg(0), billionths(0), negative(false)
+   {}
+};
+
 struct TinyGPSLocation
 {
    friend class TinyGPSPlus;
@@ -47,22 +57,17 @@ public:
    bool isValid() const    { return valid; }
    bool isUpdated() const  { return updated; }
    uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
-
-   int16_t rawLatDegrees()     { updated = false; return iLatDegrees; }
-   int16_t rawLngDegrees()     { updated = false; return iLngDegrees; }
-   uint32_t rawLatBillionths() { updated = false; return uLatBillionths; }
-   uint32_t rawLngBillionths() { updated = false; return uLngBillionths; }
+   const RawDegrees &rawLat()     { updated = false; return rawLatData; }
+   const RawDegrees &rawLng()     { updated = false; return rawLngData; }
    double lat();
    double lng();
 
-   TinyGPSLocation() : valid(false), updated(false), 
-      iLatDegrees(0), iLngDegrees(0), uLatBillionths(0), uLngBillionths(0)
+   TinyGPSLocation() : valid(false), updated(false)
    {}
 
 private:
    bool valid, updated;
-   int16_t iLatDegrees, iNewLatDegrees, iLngDegrees, iNewLngDegrees;
-   uint32_t uLatBillionths, uNewLatBillionths, uLngBillionths, uNewLngBillionths;
+   RawDegrees rawLatData, rawLngData, rawNewLatData, rawNewLngData;
    uint32_t lastCommitTime;
    void commit();
    void setLatitude(const char *term);
@@ -229,7 +234,7 @@ public:
   static const char *cardinal(double course);
 
   static int32_t parseDecimal(const char *term);
-  static void parseDegrees(const char *term, int16_t &degrees, uint32_t &billionths);
+  static void parseDegrees(const char *term, RawDegrees &deg);
 
   uint32_t charsProcessed()   const { return encodedCharCount; }
   uint32_t sentencesWithFix() const { return sentencesWithFixCount; }

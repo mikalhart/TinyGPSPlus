@@ -6,7 +6,7 @@
    4800-baud serial GPS device hooked up on pins 4(rx) and 3(tx).
 */
 static const int RXPin = 4, TXPin = 3;
-static const unsigned long GPSBaud = 4800;
+static const uint32_t GPSBaud = 4800;
 
 // The TinyGPS++ object
 TinyGPSPlus gps;
@@ -40,13 +40,15 @@ void loop()
     Serial.print(F("LOCATION   Fix Age="));
     Serial.print(gps.location.age());
     Serial.print(F("ms Raw Lat="));
-    Serial.print(gps.location.rawLatDegrees());
+    Serial.print(gps.location.rawLat().negative ? "-" : "+");
+    Serial.print(gps.location.rawLat().deg);
     Serial.print("[+");
-    Serial.print(gps.location.rawLatBillionths());
+    Serial.print(gps.location.rawLat.billionths());
     Serial.print(F(" billionths],  Raw Long="));
-    Serial.print(gps.location.rawLngDegrees());
+    Serial.print(gps.location.rawLng().negative ? "-" : "+");
+    Serial.print(gps.location.rawLng().deg);
     Serial.print("[+");
-    Serial.print(gps.location.rawLngBillionths());
+    Serial.print(gps.location.rawLng.billionths());
     Serial.print(F(" billionths],  Lat="));
     Serial.print(gps.location.lat(), 6);
     Serial.print(F(" Long="));
@@ -85,7 +87,7 @@ void loop()
 
   else if (gps.speed.isUpdated())
   {
-    Serial.print(F("SPEED      Fix Age=%ulms Raw=%ul Knots=%f MPH=%f m/s=%f km/h=%f"));
+    Serial.print(F("SPEED      Fix Age="));
     Serial.print(gps.speed.age());
     Serial.print(F("ms Raw="));
     Serial.print(gps.speed.value());

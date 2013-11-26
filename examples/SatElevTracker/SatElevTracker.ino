@@ -10,7 +10,7 @@
    4800-baud serial GPS device hooked up on pins 4(RX) and 3(TX).
 */
 static const int RXPin = 4, TXPin = 3;
-static const unsigned long GPSBaud = 4800;
+static const uint32_t GPSBaud = 4800;
 static const int MAX_SATELLITES = 40;
 static const int PAGE_LENGTH = 40;
 
