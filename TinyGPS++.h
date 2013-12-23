@@ -184,6 +184,11 @@ struct TinyGPSAltitude : TinyGPSDecimal
    double feet()         { return _GPS_FEET_PER_METER * value() / 100.0; }
 };
 
+struct TinyGPSTrackedSattelites {
+  uint8_t prn;      //"pseudo-random noise" sequences, or Gold codes. GPS sats are listed here http://en.wikipedia.org/wiki/List_of_GPS_satellites
+  uint8_t strength; //in dB
+};
+
 class TinyGPSPlus;
 class TinyGPSCustom
 {
@@ -226,6 +231,7 @@ public:
   TinyGPSAltitude altitude;
   TinyGPSInteger satellites;
   TinyGPSDecimal hdop;
+  TinyGPSTrackedSattelites trackedSatellites[12];
 
   static const char *libraryVersion() { return _GPS_VERSION; }
 
@@ -242,7 +248,7 @@ public:
   uint32_t passedChecksum()   const { return passedChecksumCount; }
 
 private:
-  enum {GPS_SENTENCE_GPGGA, GPS_SENTENCE_GPRMC, GPS_SENTENCE_OTHER};
+  enum {GPS_SENTENCE_GPGGA, GPS_SENTENCE_GPRMC, GPS_SENTENCE_GPGSV, GPS_SENTENCE_OTHER};
 
   // parsing state variables
   uint8_t parity;
@@ -252,6 +258,7 @@ private:
   uint8_t curTermNumber;
   uint8_t curTermOffset;
   bool sentenceHasFix;
+  uint8_t trackedSatellitesIndex;
 
   // custom element support
   friend class TinyGPSCustom;
