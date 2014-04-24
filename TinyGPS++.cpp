@@ -168,19 +168,19 @@ bool TinyGPSPlus::endOfTermHandler()
       switch(curSentenceType)
       {
       case GPS_SENTENCE_GPRMC:
-        date.commit();
-        time.commit();
         if (sentenceHasFix)
         {
+           date.commit();
+           time.commit();
            location.commit();
            speed.commit();
            course.commit();
         }
         break;
       case GPS_SENTENCE_GPGGA:
-        time.commit();
         if (sentenceHasFix)
         {
+          time.commit();
           location.commit();
           altitude.commit();
         }
@@ -356,7 +356,7 @@ void TinyGPSLocation::setLongitude(const char *term)
 double TinyGPSLocation::lat()
 {
    updated = false;
-   return iLatDegrees > 0 ? 
+   return iLatDegrees > 0 ?
       (iLatDegrees + uLatBillionths / 1000000000.0) :
       (iLatDegrees - uLatBillionths / 1000000000.0);
 }
@@ -364,7 +364,7 @@ double TinyGPSLocation::lat()
 double TinyGPSLocation::lng()
 {
    updated = false;
-   return iLngDegrees > 0 ? 
+   return iLngDegrees > 0 ?
       (iLngDegrees + uLngBillionths / 1000000000.0) :
       (iLngDegrees - uLngBillionths / 1000000000.0);
 }
