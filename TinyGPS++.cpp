@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdlib.h>
 
 #define _GPRMCterm   "GPRMC"
+#define _GNRMCterm   "GNRMC"
 #define _GPGGAterm   "GPGGA"
 
 TinyGPSPlus::TinyGPSPlus()
@@ -207,7 +208,7 @@ bool TinyGPSPlus::endOfTermHandler()
   // the first term determines the sentence type
   if (curTermNumber == 0)
   {
-    if (!strcmp(term, _GPRMCterm))
+    if (!strcmp(term, _GPRMCterm) || !strcmp(term, _GNRMCterm))
       curSentenceType = GPS_SENTENCE_GPRMC;
     else if (!strcmp(term, _GPGGAterm))
       curSentenceType = GPS_SENTENCE_GPGGA;
