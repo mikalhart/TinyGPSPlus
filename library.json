@@ -1,0 +1,12 @@
+{
+  "name": "TinyGPSPlus",
+  "keywords": "gps",
+  "description": "A new, customizable Arduino NMEA parsing library",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/mikalhart/TinyGPSPlus.git"
+  },
+  "frameworks": "arduino",
+  "platforms": "atmelavr"
+}
