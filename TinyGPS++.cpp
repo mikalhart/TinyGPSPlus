@@ -28,7 +28,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdlib.h>
 
 #define _GPRMCterm   "GPRMC"
+#define _GNRMCterm   "GNRMC"
 #define _GPGGAterm   "GPGGA"
+#define _GNGGAterm   "GNGGA"
 
 TinyGPSPlus::TinyGPSPlus()
   :  parity(0)
@@ -209,7 +211,11 @@ bool TinyGPSPlus::endOfTermHandler()
   {
     if (!strcmp(term, _GPRMCterm))
       curSentenceType = GPS_SENTENCE_GPRMC;
+    else if (!strcmp(term, _GNRMCterm))
+      curSentenceType = GPS_SENTENCE_GPRMC;
     else if (!strcmp(term, _GPGGAterm))
+      curSentenceType = GPS_SENTENCE_GPGGA;
+    else if (!strcmp(term, _GNGGAterm))
       curSentenceType = GPS_SENTENCE_GPGGA;
     else
       curSentenceType = GPS_SENTENCE_OTHER;
