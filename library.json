@@ -1,6 +1,6 @@
 {
   "name": "TinyGPSPlus",
-  "version": "0.95a",
+  "version": "0.95",
   "keywords": "gps",
   "description": "A new, customizable Arduino NMEA parsing library",
   "repository":
