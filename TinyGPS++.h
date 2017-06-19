@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 #include <limits.h>
 
-#define _GPS_VERSION "0.95" // software version of this library
+#define _GPS_VERSION "0.96" // software version of this library
 #define _GPS_MPH_PER_KNOT 1.15077945
 #define _GPS_MPS_PER_KNOT 0.51444444
 #define _GPS_KMPH_PER_KNOT 1.852
@@ -46,8 +46,39 @@ struct RawDegrees
    uint32_t billionths;
    bool negative;
 public:
-   RawDegrees() : deg(0), billionths(0), negative(false)
+   RawDegrees() : deg(0), billionths(0), negative(false) {}
+
+   double toDouble();
+   void operator += (const RawDegrees& rawdeg); // Overload += (for sum calculation).
+   void operator /= (int divisor); // Overload += (for mean calculation).
+};
+
+struct TinyGPSLocation;
+
+struct TinyGPSLocationAverage
+{
+   friend struct TinyGPSLocation;
+public:
+   bool isValid() const    { return valid; }
+   bool isUpdated() const  { return updated; }
+   uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
+   double lat() { updated = false; return avlat; }
+   double lng() { updated = false; return avlng; }
+   void add_lat(double lat);
+   void add_lng(double lng);
+
+   TinyGPSLocationAverage(int max)
+   : valid(false)
+   , updated(false)
+   , step(0)
+   , max_hist(max)
    {}
+
+private:
+   bool valid, updated;
+   double latArray[10], lngArray[10], avlat, avlng;
+   uint32_t lastCommitTime, step, max_hist;
+//   void commit();
 };
 
 struct TinyGPSLocation
@@ -61,14 +92,14 @@ public:
    const RawDegrees &rawLng()     { updated = false; return rawLngData; }
    double lat();
    double lng();
+//   RawDegrees average;
 
-   TinyGPSLocation() : valid(false), updated(false)
-   {}
+   TinyGPSLocation(): valid(false), updated(false), step(0), max_hist(5) {}
 
 private:
    bool valid, updated;
    RawDegrees rawLatData, rawLngData, rawNewLatData, rawNewLngData;
-   uint32_t lastCommitTime;
+   uint32_t lastCommitTime, step, max_hist;
    void commit();
    void setLatitude(const char *term);
    void setLongitude(const char *term);

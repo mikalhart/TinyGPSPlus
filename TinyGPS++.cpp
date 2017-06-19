@@ -338,6 +338,22 @@ void TinyGPSLocation::commit()
 {
    rawLatData = rawNewLatData;
    rawLngData = rawNewLngData;
+   latArray[step] = rawNewLatData.toDouble();
+   lngArray[step++] = rawNewLngData.toDouble();
+   if (step >= max_hist) {
+      double sum_lat = 0, sum_lng = 0;
+      for (uint32_t i = 0; i < max_hist; i++) {
+         sum_lat += latArray[i];
+         sum_lng += lngArray[i];
+      }
+      sum_lat /= max_hist;
+      sum_lng /= max_hist;
+      SerialUSB.println(F("*** avlat: "));
+      SerialUSB.println(sum_lat, 9);
+      SerialUSB.println(F("*** avlng: "));
+      SerialUSB.println(sum_lng, 9);
+   }
+   step %= max_hist;
    lastCommitTime = millis();
    valid = updated = true;
 }
@@ -355,15 +371,13 @@ void TinyGPSLocation::setLongitude(const char *term)
 double TinyGPSLocation::lat()
 {
    updated = false;
-   double ret = rawLatData.deg + rawLatData.billionths / 1000000000.0;
-   return rawLatData.negative ? -ret : ret;
+   return rawLatData.toDouble();
 }
 
 double TinyGPSLocation::lng()
 {
    updated = false;
-   double ret = rawLngData.deg + rawLngData.billionths / 1000000000.0;
-   return rawLngData.negative ? -ret : ret;
+   return rawLngData.toDouble();
 }
 
 void TinyGPSDate::commit()
@@ -501,3 +515,37 @@ void TinyGPSPlus::insertCustom(TinyGPSCustom *pElt, const char *sentenceName, in
    pElt->next = *ppelt;
    *ppelt = pElt;
 }
+
+double RawDegrees::toDouble() {
+    double ret = deg + billionths / 1000000000.0;
+    return negative ? -ret : ret;
+}
+
+void RawDegrees::operator += (const RawDegrees& rawdeg) {
+   int16_t deg_int = this->negative ? -this->deg : this->deg + \
+      rawdeg.negative ? -rawdeg.deg : rawdeg.deg;
+   int32_t billionth_int = this->negative ? -this->billionths : this->billionths + \
+      rawdeg.negative ? -rawdeg.billionths : rawdeg.billionths;
+   if (billionth_int >= 1000000000) {
+      billionth_int -= 1000000000;
+      deg_int++;
+   }
+   else if (billionth_int <= -1000000000) {
+      billionth_int += 1000000000;
+      deg_int--;
+   }
+   double new_deg = deg_int + billionth_int / 1000000000.0;
+   boolean new_negative = new_deg < 0;
+   this->deg = new_negative ? -deg_int : deg_int;
+   this->billionths = new_negative ? -billionth_int : billionth_int;
+}
+
+void RawDegrees::operator /= (int divisor) {
+   this->deg /= divisor;
+   this->billionths /= divisor;
+}
+
+TinyGPSLocationAverage::commit() {
+
+}
+
