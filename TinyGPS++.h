@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 #include <limits.h>
 
-#define _GPS_VERSION "0.95" // software version of this library
+#define _GPS_VERSION "0.96" // software version of this library
 #define _GPS_MPH_PER_KNOT 1.15077945
 #define _GPS_MPS_PER_KNOT 0.51444444
 #define _GPS_KMPH_PER_KNOT 1.852
@@ -46,8 +46,31 @@ struct RawDegrees
    uint32_t billionths;
    bool negative;
 public:
-   RawDegrees() : deg(0), billionths(0), negative(false)
-   {}
+   RawDegrees() : deg(0), billionths(0), negative(false) {}
+
+   double toDouble();
+};
+
+struct TinyGPSLocationAverage
+{
+   friend struct TinyGPSLocation;
+public:
+   bool isValid() const    { return valid; }
+   bool isUpdated() const  { return updated; }
+   uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
+   double lat() { updated = false; return avlat; }
+   double lng() { updated = false; return avlng; }
+   void resize(int max);
+
+   TinyGPSLocationAverage(int max) : avlat(0), avlng(0)
+   { resize(max); }
+
+private:
+   bool valid, updated;
+   double *latArray, *lngArray, avlat, avlng;
+   uint32_t lastCommitTime, step, max_hist;
+   void commit();
+   void update(double lat, double lng);
 };
 
 struct TinyGPSLocation
@@ -61,6 +84,8 @@ public:
    const RawDegrees &rawLng()     { updated = false; return rawLngData; }
    double lat();
    double lng();
+
+   TinyGPSLocationAverage average = TinyGPSLocationAverage(10);
 
    TinyGPSLocation() : valid(false), updated(false)
    {}

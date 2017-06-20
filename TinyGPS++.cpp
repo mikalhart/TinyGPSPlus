@@ -338,6 +338,7 @@ void TinyGPSLocation::commit()
 {
    rawLatData = rawNewLatData;
    rawLngData = rawNewLngData;
+   average.update(rawNewLatData.toDouble(), rawNewLngData.toDouble());
    lastCommitTime = millis();
    valid = updated = true;
 }
@@ -355,15 +356,13 @@ void TinyGPSLocation::setLongitude(const char *term)
 double TinyGPSLocation::lat()
 {
    updated = false;
-   double ret = rawLatData.deg + rawLatData.billionths / 1000000000.0;
-   return rawLatData.negative ? -ret : ret;
+   return rawLatData.toDouble();
 }
 
 double TinyGPSLocation::lng()
 {
    updated = false;
-   double ret = rawLngData.deg + rawLngData.billionths / 1000000000.0;
-   return rawLngData.negative ? -ret : ret;
+   return rawLngData.toDouble();
 }
 
 void TinyGPSDate::commit()
@@ -501,3 +500,38 @@ void TinyGPSPlus::insertCustom(TinyGPSCustom *pElt, const char *sentenceName, in
    pElt->next = *ppelt;
    *ppelt = pElt;
 }
+
+double RawDegrees::toDouble() {
+    double ret = deg + billionths / 1000000000.0;
+    return negative ? -ret : ret;
+}
+
+void TinyGPSLocationAverage::update(double lat, double lng) {
+   latArray[step] = lat;
+   lngArray[step++] = lng;
+   if (step >= max_hist) {
+      double sum_lat = 0, sum_lng = 0;
+      for (uint32_t i = 0; i < max_hist; i++) {
+         sum_lat += latArray[i];
+         sum_lng += lngArray[i];
+      }
+      avlat = sum_lat / max_hist;
+      avlng = sum_lng / max_hist;
+      commit();
+   }
+   step %= max_hist;
+}
+
+void TinyGPSLocationAverage::commit() {
+   lastCommitTime = millis();
+   valid = updated = true;
+}
+
+void TinyGPSLocationAverage::resize(int max) {
+   step = 0;
+   max_hist = max;
+   valid = updated = false;
+   latArray = new double[max];
+   lngArray = new double[max];
+}
+
