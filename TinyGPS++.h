@@ -64,8 +64,7 @@ public:
    uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
    double lat() { updated = false; return avlat; }
    double lng() { updated = false; return avlng; }
-   void add_lat(double lat);
-   void add_lng(double lng);
+   void update(double lat, double lng);
 
    TinyGPSLocationAverage(int max)
    : valid(false)
@@ -78,7 +77,7 @@ private:
    bool valid, updated;
    double latArray[10], lngArray[10], avlat, avlng;
    uint32_t lastCommitTime, step, max_hist;
-//   void commit();
+   void commit();
 };
 
 struct TinyGPSLocation
@@ -92,9 +91,10 @@ public:
    const RawDegrees &rawLng()     { updated = false; return rawLngData; }
    double lat();
    double lng();
-//   RawDegrees average;
+   TinyGPSLocationAverage average = TinyGPSLocationAverage(10);
 
-   TinyGPSLocation(): valid(false), updated(false), step(0), max_hist(5) {}
+   TinyGPSLocation() : valid(false), updated(false)
+   {}
 
 private:
    bool valid, updated;

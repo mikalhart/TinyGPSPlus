@@ -338,22 +338,7 @@ void TinyGPSLocation::commit()
 {
    rawLatData = rawNewLatData;
    rawLngData = rawNewLngData;
-   latArray[step] = rawNewLatData.toDouble();
-   lngArray[step++] = rawNewLngData.toDouble();
-   if (step >= max_hist) {
-      double sum_lat = 0, sum_lng = 0;
-      for (uint32_t i = 0; i < max_hist; i++) {
-         sum_lat += latArray[i];
-         sum_lng += lngArray[i];
-      }
-      sum_lat /= max_hist;
-      sum_lng /= max_hist;
-      SerialUSB.println(F("*** avlat: "));
-      SerialUSB.println(sum_lat, 9);
-      SerialUSB.println(F("*** avlng: "));
-      SerialUSB.println(sum_lng, 9);
-   }
-   step %= max_hist;
+   average.update(rawNewLatData.toDouble(), rawNewLngData.toDouble());
    lastCommitTime = millis();
    valid = updated = true;
 }
@@ -545,7 +530,24 @@ void RawDegrees::operator /= (int divisor) {
    this->billionths /= divisor;
 }
 
-TinyGPSLocationAverage::commit() {
+void TinyGPSLocationAverage::update(double lat, double lng) {
+   latArray[step] = lat;
+   lngArray[step++] = lng;
+   if (step >= max_hist) {
+      double sum_lat = 0, sum_lng = 0;
+      for (uint32_t i = 0; i < max_hist; i++) {
+         sum_lat += latArray[i];
+         sum_lng += lngArray[i];
+      }
+      avlat = sum_lat / max_hist;
+      avlng = sum_lng / max_hist;
+      commit();
+   }
+   step %= max_hist;
+}
 
+void TinyGPSLocationAverage::commit() {
+   lastCommitTime = millis();
+   valid = updated = true;
 }
 
