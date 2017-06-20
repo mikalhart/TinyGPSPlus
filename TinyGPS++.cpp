@@ -527,3 +527,11 @@ void TinyGPSLocationAverage::commit() {
    valid = updated = true;
 }
 
+void TinyGPSLocationAverage::resize(int max) {
+   step = 0;
+   max_hist = max;
+   valid = updated = false;
+   latArray = new double[max];
+   lngArray = new double[max];
+}
+

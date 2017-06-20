@@ -51,8 +51,6 @@ public:
    double toDouble();
 };
 
-struct TinyGPSLocation;
-
 struct TinyGPSLocationAverage
 {
    friend struct TinyGPSLocation;
@@ -62,17 +60,10 @@ public:
    uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
    double lat() { updated = false; return avlat; }
    double lng() { updated = false; return avlng; }
+   void resize(int max);
 
-   void resize(int max)
-   {
-	   step = 0;
-	   max_hist = max;
-	   valid = updated = false;
-	   latArray = new double[max];
-	   lngArray = new double[max];
-   }
-
-   TinyGPSLocationAverage(int max) : avlat(0), avlng(0) { resize(max); }
+   TinyGPSLocationAverage(int max) : avlat(0), avlng(0)
+   { resize(max); }
 
 private:
    bool valid, updated;
@@ -93,6 +84,7 @@ public:
    const RawDegrees &rawLng()     { updated = false; return rawLngData; }
    double lat();
    double lng();
+
    TinyGPSLocationAverage average = TinyGPSLocationAverage(10);
 
    TinyGPSLocation() : valid(false), updated(false)
