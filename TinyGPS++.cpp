@@ -506,30 +506,6 @@ double RawDegrees::toDouble() {
     return negative ? -ret : ret;
 }
 
-void RawDegrees::operator += (const RawDegrees& rawdeg) {
-   int16_t deg_int = this->negative ? -this->deg : this->deg + \
-      rawdeg.negative ? -rawdeg.deg : rawdeg.deg;
-   int32_t billionth_int = this->negative ? -this->billionths : this->billionths + \
-      rawdeg.negative ? -rawdeg.billionths : rawdeg.billionths;
-   if (billionth_int >= 1000000000) {
-      billionth_int -= 1000000000;
-      deg_int++;
-   }
-   else if (billionth_int <= -1000000000) {
-      billionth_int += 1000000000;
-      deg_int--;
-   }
-   double new_deg = deg_int + billionth_int / 1000000000.0;
-   boolean new_negative = new_deg < 0;
-   this->deg = new_negative ? -deg_int : deg_int;
-   this->billionths = new_negative ? -billionth_int : billionth_int;
-}
-
-void RawDegrees::operator /= (int divisor) {
-   this->deg /= divisor;
-   this->billionths /= divisor;
-}
-
 void TinyGPSLocationAverage::update(double lat, double lng) {
    latArray[step] = lat;
    lngArray[step++] = lng;

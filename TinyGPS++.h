@@ -49,8 +49,6 @@ public:
    RawDegrees() : deg(0), billionths(0), negative(false) {}
 
    double toDouble();
-   void operator += (const RawDegrees& rawdeg); // Overload += (for sum calculation).
-   void operator /= (int divisor); // Overload += (for mean calculation).
 };
 
 struct TinyGPSLocation;
@@ -99,7 +97,7 @@ public:
 private:
    bool valid, updated;
    RawDegrees rawLatData, rawLngData, rawNewLatData, rawNewLngData;
-   uint32_t lastCommitTime, step, max_hist;
+   uint32_t lastCommitTime;
    void commit();
    void setLatitude(const char *term);
    void setLongitude(const char *term);
