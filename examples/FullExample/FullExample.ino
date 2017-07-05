@@ -42,7 +42,7 @@ void loop()
   printFloat(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
   printFloat(gps.course.deg(), gps.course.isValid(), 7, 2);
   printFloat(gps.speed.kmph(), gps.speed.isValid(), 6, 2);
-  printStr(gps.course.isValid() ? TinyGPSPlus::cardinal(gps.course.value()) : "*** ", 6);
+  printStr(gps.course.isValid() ? TinyGPSPlus::cardinal(gps.course.deg()) : "*** ", 6);
 
   unsigned long distanceKmToLondon =
     (unsigned long)TinyGPSPlus::distanceBetween(
