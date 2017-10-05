@@ -41,10 +41,6 @@ passedChecksum	KEYWORD2
 isValid	KEYWORD2
 isUpdated	KEYWORD2
 age	KEYWORD2
-rawLatDegrees	KEYWORD2
-rawLngDegrees	KEYWORD2
-rawLatBillionths	KEYWORD2
-rawLngBillionths	KEYWORD2
 lat	KEYWORD2
 lng	KEYWORD2
 isUpdatedDate	KEYWORD2
@@ -62,6 +58,8 @@ mph	KEYWORD2
 mps	KEYWORD2
 kmph	KEYWORD2
 deg	KEYWORD2
+billionths	KEYWORD2
+negative	KEYWORD2
 meters	KEYWORD2
 miles	KEYWORD2
 kilometers	KEYWORD2
