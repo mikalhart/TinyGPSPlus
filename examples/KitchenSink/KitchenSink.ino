@@ -139,8 +139,10 @@ void loop()
   {
     Serial.print(F("HDOP       Fix Age="));
     Serial.print(gps.hdop.age());
-    Serial.print(F("ms Value="));
-    Serial.println(gps.hdop.value());
+    Serial.print(F("ms raw="));
+    Serial.print(gps.hdop.value());
+    Serial.print(F(" hdop="));
+    Serial.println(gps.hdop.hdop());
   }
 
   else if (millis() - last > 5000)

@@ -4,7 +4,7 @@
 /*
    This sample demonstrates TinyGPS++'s capacity for extracting custom
    fields from any NMEA sentence.  TinyGPS++ has built-in facilities for
-   extracting latitude, longitude, altitude, etc., from the $GPGLL and 
+   extracting latitude, longitude, altitude, etc., from the $GPGGA and 
    $GPRMC sentences.  But with the TinyGPSCustom type, you can extract
    other NMEA fields, even from non-standard NMEA sentences.
 

@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 #include <limits.h>
 
-#define _GPS_VERSION "1.0.1" // software version of this library
+#define _GPS_VERSION "1.0.2" // software version of this library
 #define _GPS_MPH_PER_KNOT 1.15077945
 #define _GPS_MPS_PER_KNOT 0.51444444
 #define _GPS_KMPH_PER_KNOT 1.852
@@ -184,6 +184,11 @@ struct TinyGPSAltitude : TinyGPSDecimal
    double feet()         { return _GPS_FEET_PER_METER * value() / 100.0; }
 };
 
+struct TinyGPSHDOP : TinyGPSDecimal
+{
+   double hdop() { return value() / 100.0; }
+};
+
 class TinyGPSPlus;
 class TinyGPSCustom
 {
@@ -225,7 +230,7 @@ public:
   TinyGPSCourse course;
   TinyGPSAltitude altitude;
   TinyGPSInteger satellites;
-  TinyGPSDecimal hdop;
+  TinyGPSHDOP hdop;
 
   static const char *libraryVersion() { return _GPS_VERSION; }
 
