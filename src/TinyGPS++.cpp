@@ -230,6 +230,7 @@ bool TinyGPSPlus::endOfTermHandler()
     case COMBINE(GPS_SENTENCE_GPRMC, 1): // Time in both sentences
     case COMBINE(GPS_SENTENCE_GPGGA, 1):
       time.setTime(term);
+      location.time.setTime(term);
       break;
     case COMBINE(GPS_SENTENCE_GPRMC, 2): // GPRMC validity
       sentenceHasFix = term[0] == 'A';
@@ -344,6 +345,7 @@ void TinyGPSLocation::commit()
    rawLngData = rawNewLngData;
    fixQuality = newFixQuality;
    fixMode = newFixMode;
+   time.commit();
    lastCommitTime = millis();
    valid = updated = true;
 }
