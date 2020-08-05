@@ -371,7 +371,9 @@ void TinyGPSLocation::commit()
 {
   rawLatData = rawNewLatData;
   rawLngData = rawNewLngData;
-   lastCommitTime = millis();
+  fixQuality = newFixQuality;
+  fixMode = newFixMode;
+  lastCommitTime = millis();
   updated = true;
   valid = (rawNewLatData.deg <= 90 && rawNewLngData.deg <= 180);
 }
