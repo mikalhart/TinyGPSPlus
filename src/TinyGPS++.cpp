@@ -45,6 +45,7 @@ TinyGPSPlus::TinyGPSPlus()
   ,  sentencesWithFixCount(0)
   ,  failedChecksumCount(0)
   ,  passedChecksumCount(0)
+  ,  invalidDataCount(0)
 {
   term[0] = '\0';
 }
@@ -61,6 +62,7 @@ bool TinyGPSPlus::encode(char c)
   {
   case ',': // term terminators
     parity ^= (uint8_t)c;
+    // fall through
   case '\r':
   case '\n':
   case '*':
@@ -131,22 +133,34 @@ int32_t TinyGPSPlus::parseDecimal(const char *term)
 // Parse degrees in that funny NMEA format DDMM.MMMM
 void TinyGPSPlus::parseDegrees(const char *term, RawDegrees &deg)
 {
-  uint32_t leftOfDecimal = (uint32_t)atol(term);
-  uint16_t minutes = (uint16_t)(leftOfDecimal % 100);
+  deg.deg = 181; // Set to invalid value
+  if (!isdigit(*term) && *term != '.') {
+    // An invalid character
+    // TODO: Must check if the degree is allowed to start with a decimal point.
+    return;
+  }
+
+  const uint32_t leftOfDecimal = (uint32_t)atol(term);
+
+  while (isdigit(*term)) {
+    ++term;
+  }
+
+  if (*term != '.') {
+    // Degree must have a decimal point
+    return;
+  }
+
+  deg.deg = (int16_t)(leftOfDecimal / 100);
+  const uint16_t minutes = (uint16_t)(leftOfDecimal % 100);
   uint32_t multiplier = 10000000UL;
   uint32_t tenMillionthsOfMinutes = minutes * multiplier;
 
-  deg.deg = (int16_t)(leftOfDecimal / 100);
-
-  while (isdigit(*term))
-    ++term;
-
-  if (*term == '.')
-    while (isdigit(*++term))
-    {
-      multiplier /= 10;
-      tenMillionthsOfMinutes += (*term - '0') * multiplier;
-    }
+  while (isdigit(*++term))
+  {
+    multiplier /= 10;
+    tenMillionthsOfMinutes += (*term - '0') * multiplier;
+  }
 
   deg.billionths = (5 * tenMillionthsOfMinutes + 1) / 3;
   deg.negative = false;
@@ -173,22 +187,41 @@ bool TinyGPSPlus::endOfTermHandler()
       case GPS_SENTENCE_GPRMC:
         date.commit();
         time.commit();
-        if (sentenceHasFix)
+        if (sentenceHasFix && date.valid && time.valid)
         {
            location.commit();
            speed.commit();
            course.commit();
+           if (!(location.valid && speed.valid && course.valid)) {
+              // one of them is invalid, so consider the entire sentence invalid
+              date.valid = false;
+              time.valid = false;
+              location.valid = false;
+              speed.valid = false;
+              course.valid = false;
+              ++invalidDataCount;
+           }
         }
         break;
       case GPS_SENTENCE_GPGGA:
         time.commit();
-        if (sentenceHasFix)
+        satellites.commit();
+        hdop.commit();
+        if (sentenceHasFix && time.valid)
         {
           location.commit();
           altitude.commit();
+          if (!(satellites.valid && hdop.valid && location.valid && altitude.valid)) {
+            // one of them is invalid, so consider the entire sentence invalid
+            time.valid = false;
+            satellites.valid = false;
+            hdop.valid = false;
+            location.valid = false;
+            altitude.valid = false;
+            ++invalidDataCount;
+          }
         }
-        satellites.commit();
-        hdop.commit();
+ 
         break;
       }
 
@@ -336,10 +369,13 @@ const char *TinyGPSPlus::cardinal(double course)
 
 void TinyGPSLocation::commit()
 {
-   rawLatData = rawNewLatData;
-   rawLngData = rawNewLngData;
-   lastCommitTime = millis();
-   valid = updated = true;
+  rawLatData = rawNewLatData;
+  rawLngData = rawNewLngData;
+  fixQuality = newFixQuality;
+  fixMode = newFixMode;
+  lastCommitTime = millis();
+  updated = true;
+  valid = (rawNewLatData.deg <= 90 && rawNewLngData.deg <= 180);
 }
 
 void TinyGPSLocation::setLatitude(const char *term)
@@ -368,16 +404,54 @@ double TinyGPSLocation::lng()
 
 void TinyGPSDate::commit()
 {
+   const uint32_t olddate = date;
    date = newDate;
+   valid = false;
+   
+   {
+     const uint16_t newyear = year();
+     if (newyear < 2020) {
+       // Very unlikely the year of received date is before 2020, which is now.
+       date = olddate;
+       return;
+     }
+   }
+   {
+     const uint8_t newmonth = month();
+     if (newmonth > 12 || newmonth == 0) {
+       date = olddate;
+       return;
+     }
+   }
+   {
+     const uint8_t newday = day();
+     if (newday > 31 || newday == 0) {
+       // Day of month
+       date = olddate;
+       return;
+     }
+   }
    lastCommitTime = millis();
-   valid = updated = true;
+   valid = true;
+   updated = true;
 }
 
 void TinyGPSTime::commit()
 {
    time = newTime;
    lastCommitTime = millis();
-   valid = updated = true;
+   valid = false;
+   if (second() > 60) {
+     return;
+   }
+   if (minute() > 59) {
+     return;
+   }
+   if (hour() > 23) {
+     return;
+   }
+   updated = true;
+   valid = true;
 }
 
 void TinyGPSTime::setTime(const char *term)
