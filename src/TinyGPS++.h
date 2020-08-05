@@ -62,7 +62,7 @@ public:
    double lat();
    double lng();
 
-   TinyGPSLocation() : valid(false), updated(false)
+   TinyGPSLocation() : valid(false), updated(false), lastCommitTime(0)
    {}
 
 private:
@@ -87,7 +87,7 @@ public:
    uint8_t month();
    uint8_t day();
 
-   TinyGPSDate() : valid(false), updated(false), date(0)
+   TinyGPSDate() : valid(false), updated(false), date(0), newDate(0), lastCommitTime(0)
    {}
 
 private:
@@ -112,7 +112,7 @@ public:
    uint8_t second();
    uint8_t centisecond();
 
-   TinyGPSTime() : valid(false), updated(false), time(0)
+   TinyGPSTime() : valid(false), updated(false), time(0), newTime(0), lastCommitTime(0)
    {}
 
 private:
@@ -132,7 +132,7 @@ public:
    uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
    int32_t value()         { updated = false; return val; }
 
-   TinyGPSDecimal() : valid(false), updated(false), val(0)
+   TinyGPSDecimal() : valid(false), updated(false), lastCommitTime(0), val(0), newval(0)
    {}
 
 private:
@@ -152,7 +152,7 @@ public:
    uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
    uint32_t value()        { updated = false; return val; }
 
-   TinyGPSInteger() : valid(false), updated(false), val(0)
+   TinyGPSInteger() : valid(false), updated(false), lastCommitTime(0), val(0), newval(0)
    {}
 
 private:
@@ -206,14 +206,14 @@ private:
    void commit();
    void set(const char *term);
 
-   char stagingBuffer[_GPS_MAX_FIELD_SIZE + 1];
-   char buffer[_GPS_MAX_FIELD_SIZE + 1];
-   unsigned long lastCommitTime;
-   bool valid, updated;
-   const char *sentenceName;
-   int termNumber;
+   char stagingBuffer[_GPS_MAX_FIELD_SIZE + 1] = {0};
+   char buffer[_GPS_MAX_FIELD_SIZE + 1] = {0};
+   unsigned long lastCommitTime = 0;
+   bool valid, updated = false;
+   const char *sentenceName = nullptr;
+   int termNumber = 0;
    friend class TinyGPSPlus;
-   TinyGPSCustom *next;
+   TinyGPSCustom *next = nullptr;
 };
 
 class TinyGPSPlus
@@ -245,30 +245,33 @@ public:
   uint32_t sentencesWithFix() const { return sentencesWithFixCount; }
   uint32_t failedChecksum()   const { return failedChecksumCount; }
   uint32_t passedChecksum()   const { return passedChecksumCount; }
+  uint32_t invalidData()      const { return invalidDataCount; }
 
 private:
   enum {GPS_SENTENCE_GPGGA, GPS_SENTENCE_GPRMC, GPS_SENTENCE_OTHER};
 
   // parsing state variables
-  uint8_t parity;
-  bool isChecksumTerm;
-  char term[_GPS_MAX_FIELD_SIZE];
-  uint8_t curSentenceType;
-  uint8_t curTermNumber;
-  uint8_t curTermOffset;
-  bool sentenceHasFix;
+  uint8_t parity = 0;
+  bool isChecksumTerm = false;
+  char term[_GPS_MAX_FIELD_SIZE] = {0};
+  uint8_t curSentenceType = 0;
+  uint8_t curSentenceSystem = 0;
+  uint8_t curTermNumber = 0;
+  uint8_t curTermOffset = 0;
+  bool sentenceHasFix = false;
 
   // custom element support
   friend class TinyGPSCustom;
-  TinyGPSCustom *customElts;
-  TinyGPSCustom *customCandidates;
+  TinyGPSCustom *customElts = nullptr;
+  TinyGPSCustom *customCandidates = nullptr;
   void insertCustom(TinyGPSCustom *pElt, const char *sentenceName, int index);
 
   // statistics
-  uint32_t encodedCharCount;
-  uint32_t sentencesWithFixCount;
-  uint32_t failedChecksumCount;
-  uint32_t passedChecksumCount;
+  uint32_t encodedCharCount = 0;
+  uint32_t sentencesWithFixCount = 0;
+  uint32_t failedChecksumCount = 0;
+  uint32_t passedChecksumCount = 0;
+  uint32_t invalidDataCount = 0;
 
   // internal utilities
   int fromHex(char a);
