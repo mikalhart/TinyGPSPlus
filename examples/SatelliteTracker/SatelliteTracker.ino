@@ -1,11 +1,11 @@
-#include <TinyGPS++.h>
+#include <TinyGPSPlus.h>
 #include <SoftwareSerial.h>
 /*
    This sample code demonstrates how to use an array of TinyGPSCustom objects
    to monitor all the visible satellites.
 
    Satellite numbers, elevation, azimuth, and signal-to-noise ratio are not
-   normally tracked by TinyGPS++, but by using TinyGPSCustom we get around this.
+   normally tracked by TinyGPSPlus, but by using TinyGPSCustom we get around this.
 
    The simple code also demonstrates how to use arrays of TinyGPSCustom objects,
    each monitoring a different field of the $GPGSV sentence.
@@ -16,7 +16,7 @@
 static const int RXPin = 4, TXPin = 3;
 static const uint32_t GPSBaud = 4800;
 
-// The TinyGPS++ object
+// The TinyGPSPlus object
 TinyGPSPlus gps;
 
 // The serial connection to the GPS device
@@ -70,7 +70,7 @@ void setup()
 
   Serial.println(F("SatelliteTracker.ino"));
   Serial.println(F("Monitoring satellite location and signal strength using TinyGPSCustom"));
-  Serial.print(F("Testing TinyGPS++ library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
+  Serial.print(F("Testing TinyGPSPlus library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
   Serial.println(F("by Mikal Hart"));
   Serial.println();
   

@@ -1,9 +1,9 @@
-#include <TinyGPS++.h>
+#include <TinyGPSPlus.h>
 #include <SoftwareSerial.h>
 
 /*
-   This sample demonstrates TinyGPS++'s capacity for extracting custom
-   fields from any NMEA sentence.  TinyGPS++ has built-in facilities for
+   This sample demonstrates TinyGPSPlus's capacity for extracting custom
+   fields from any NMEA sentence.  TinyGPSPlus has built-in facilities for
    extracting latitude, longitude, altitude, etc., from the $GPGGA and 
    $GPRMC sentences.  But with the TinyGPSCustom type, you can extract
    other NMEA fields, even from non-standard NMEA sentences.
@@ -14,7 +14,7 @@
 static const int RXPin = 4, TXPin = 3;
 static const uint32_t GPSBaud = 4800;
 
-// The TinyGPS++ object
+// The TinyGPSPlus object
 TinyGPSPlus gps;
 
 // The serial connection to the GPS device
@@ -45,7 +45,7 @@ void setup()
 
   Serial.println(F("UsingCustomFields.ino"));
   Serial.println(F("Demonstrating how to extract any NMEA field using TinyGPSCustom"));
-  Serial.print(F("Testing TinyGPS++ library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
+  Serial.print(F("Testing TinyGPSPlus library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
   Serial.println(F("by Mikal Hart"));
   Serial.println();
 }
