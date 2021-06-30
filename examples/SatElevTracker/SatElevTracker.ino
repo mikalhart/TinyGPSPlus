@@ -1,9 +1,9 @@
-#include <TinyGPS++.h>
+#include <TinyGPSPlus.h>
 #include <SoftwareSerial.h>
 /*
    This sample code tracks satellite elevations using TinyGPSCustom objects.
 
-   Satellite numbers and elevations are not normally tracked by TinyGPS++, but 
+   Satellite numbers and elevations are not normally tracked by TinyGPSPlus, but 
    by using TinyGPSCustom we get around this.
 
    It requires the use of SoftwareSerial and assumes that you have a
@@ -14,7 +14,7 @@ static const uint32_t GPSBaud = 4800;
 static const int MAX_SATELLITES = 40;
 static const int PAGE_LENGTH = 40;
 
-// The TinyGPS++ object
+// The TinyGPSPlus object
 TinyGPSPlus gps;
 
 // The serial connection to the GPS device
@@ -40,7 +40,7 @@ void setup()
 
   Serial.println(F("SatElevTracker.ino"));
   Serial.println(F("Displays GPS satellite elevations as they change"));
-  Serial.print(F("Testing TinyGPS++ library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
+  Serial.print(F("Testing TinyGPSPlus library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
   Serial.println(F("by Mikal Hart"));
   Serial.println();
   

@@ -1,7 +1,7 @@
-#include <TinyGPS++.h>
+#include <TinyGPSPlus.h>
 /* 
-   This sample sketch should be the first you try out when you are testing a TinyGPS++
-   (TinyGPSPlus) installation.  In normal use, you feed TinyGPS++ objects characters from
+   This sample sketch should be the first you try out when you are testing a TinyGPSPlus
+   (TinyGPSPlus) installation.  In normal use, you feed TinyGPSPlus objects characters from
    a serial NMEA GPS device, but this example uses static strings for simplicity.
 */
 
@@ -14,7 +14,7 @@ const char *gpsStream =
   "$GPRMC,045251.000,A,3014.4275,N,09749.0626,W,0.51,217.94,030913,,,A*7D\r\n"
   "$GPGGA,045252.000,3014.4273,N,09749.0628,W,1,09,1.3,206.9,M,-22.5,M,,0000*6F\r\n";
 
-// The TinyGPS++ object
+// The TinyGPSPlus object
 TinyGPSPlus gps;
 
 void setup()
@@ -22,8 +22,8 @@ void setup()
   Serial.begin(115200);
 
   Serial.println(F("BasicExample.ino"));
-  Serial.println(F("Basic demonstration of TinyGPS++ (no device needed)"));
-  Serial.print(F("Testing TinyGPS++ library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
+  Serial.println(F("Basic demonstration of TinyGPSPlus (no device needed)"));
+  Serial.print(F("Testing TinyGPSPlus library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
   Serial.println(F("by Mikal Hart"));
   Serial.println();
 
