@@ -1,14 +1,14 @@
-#include <TinyGPS++.h>
+#include <TinyGPSPlus.h>
 #include <SoftwareSerial.h>
 /*
-   This sample code demonstrates just about every built-in operation of TinyGPS++ (TinyGPSPlus).
+   This sample code demonstrates just about every built-in operation of TinyGPSPlus (TinyGPSPlus).
    It requires the use of SoftwareSerial, and assumes that you have a
    4800-baud serial GPS device hooked up on pins 4(rx) and 3(tx).
 */
 static const int RXPin = 4, TXPin = 3;
 static const uint32_t GPSBaud = 4800;
 
-// The TinyGPS++ object
+// The TinyGPSPlus object
 TinyGPSPlus gps;
 
 // The serial connection to the GPS device
@@ -23,8 +23,8 @@ void setup()
   ss.begin(GPSBaud);
 
   Serial.println(F("KitchenSink.ino"));
-  Serial.println(F("Demonstrating nearly every feature of TinyGPS++"));
-  Serial.print(F("Testing TinyGPS++ library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
+  Serial.println(F("Demonstrating nearly every feature of TinyGPSPlus"));
+  Serial.print(F("Testing TinyGPSPlus library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
   Serial.println(F("by Mikal Hart"));
   Serial.println();
 }
