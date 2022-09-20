@@ -3,7 +3,7 @@ TinyGPS++ - a small GPS library for Arduino providing universal NMEA parsing
 Based on work by and "distanceBetween" and "courseTo" courtesy of Maarten Lamers.
 Suggestion to add satellites, courseTo(), and cardinal() by Matt Monson.
 Location precision improvements suggested by Wayne Holder.
-Copyright (C) 2008-2013 Mikal Hart
+Copyright (C) 2008-2022 Mikal Hart
 All rights reserved.
 
 This library is free software; you can redistribute it and/or
@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 #include <limits.h>
 
-#define _GPS_VERSION "1.0.2" // software version of this library
+#define _GPS_VERSION "1.0.3" // software version of this library
 #define _GPS_MPH_PER_KNOT 1.15077945
 #define _GPS_MPS_PER_KNOT 0.51444444
 #define _GPS_KMPH_PER_KNOT 1.852
