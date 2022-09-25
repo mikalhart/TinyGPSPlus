@@ -230,6 +230,7 @@ bool TinyGPSPlus::endOfTermHandler()
     case COMBINE(GPS_SENTENCE_GPRMC, 1): // Time in both sentences
     case COMBINE(GPS_SENTENCE_GPGGA, 1):
       time.setTime(term);
+      location.time.setTime(term);
       break;
     case COMBINE(GPS_SENTENCE_GPRMC, 2): // GPRMC validity
       sentenceHasFix = term[0] == 'A';
@@ -261,6 +262,7 @@ bool TinyGPSPlus::endOfTermHandler()
       break;
     case COMBINE(GPS_SENTENCE_GPGGA, 6): // Fix data (GPGGA)
       sentenceHasFix = term[0] > '0';
+      location.newFixQuality = sentenceHasFix ? (FixQuality)(term[0] - '0') : Invalid;
       break;
     case COMBINE(GPS_SENTENCE_GPGGA, 7): // Satellites used (GPGGA)
       satellites.set(term);
@@ -270,6 +272,9 @@ bool TinyGPSPlus::endOfTermHandler()
       break;
     case COMBINE(GPS_SENTENCE_GPGGA, 9): // Altitude (GPGGA)
       altitude.set(term);
+      break;
+    case COMBINE(GPS_SENTENCE_GPRMC, 12):
+      location.newFixMode = (FixMode)term[0];
       break;
   }
 
@@ -338,6 +343,9 @@ void TinyGPSLocation::commit()
 {
    rawLatData = rawNewLatData;
    rawLngData = rawNewLngData;
+   fixQuality = newFixQuality;
+   fixMode = newFixMode;
+   time.commit();
    lastCommitTime = millis();
    valid = updated = true;
 }
