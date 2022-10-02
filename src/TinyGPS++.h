@@ -24,12 +24,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef __TinyGPSPlus_h
 #define __TinyGPSPlus_h
 
-#if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"
+#if defined (ARDUINO)
+#if ARDUINO >= 100
+   #include "Arduino.h"
 #else
-#include "WProgram.h"
-#endif
-#include <limits.h>
+   #include "WProgram.h"
+#endif  // ARDUINO >= 100
+#else
+   #include <cstdint>
+   #include <limits.h>
+
+   unsigned long millis();
+#endif  // ARDUINO
 
 #define _GPS_VERSION "1.0.3" // software version of this library
 #define _GPS_MPH_PER_KNOT 1.15077945
