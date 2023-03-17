@@ -484,7 +484,7 @@ void TinyGPSCustom::commit()
 
 void TinyGPSCustom::set(const char *term)
 {
-   strncpy(this->stagingBuffer, term, sizeof(this->stagingBuffer));
+   strcpy(this->stagingBuffer, term);
 }
 
 void TinyGPSPlus::insertCustom(TinyGPSCustom *pElt, const char *sentenceName, int termNumber)
