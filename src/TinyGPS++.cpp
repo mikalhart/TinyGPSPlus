@@ -108,6 +108,16 @@ bool TinyGPSPlus::encode(char c)
   return false;
 }
 
+bool TinyGPSPlus::encode(char* c, size_t len)
+{
+  bool bRet = false;
+
+  for(int i = 0; i < len; i++)
+    bRet |= encode(c[i]);
+
+  return bRet; // Return true if one of the characters resulted in a valid sentence
+}
+
 //
 // internal utilities
 //
