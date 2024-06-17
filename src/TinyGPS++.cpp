@@ -228,8 +228,14 @@ bool TinyGPSPlus::endOfTermHandler()
       curSentenceType = GPS_SENTENCE_OTHER;
 
     // Any custom candidates of this sentence type?
-    for (customCandidates = customElts; customCandidates != NULL && strcmp(customCandidates->sentenceName, term) < 0; customCandidates = customCandidates->next);
-    if (customCandidates != NULL && strcmp(customCandidates->sentenceName, term) > 0)
+    // for (customCandidates = customElts; customCandidates != NULL && strcmp(customCandidates->sentenceName, term) < 0; customCandidates = customCandidates->next);
+    // if (customCandidates != NULL && strcmp(customCandidates->sentenceName, term) > 0)
+    //   customCandidates = NULL;
+    
+    // modification: look if string is present in string, not for equality
+    // this allows to use the full NMEA sentence identifiers or the generic sentence names (
+    for (customCandidates = customElts; customCandidates != NULL && !strstr(term, customCandidates->sentenceName); customCandidates = customCandidates->next);
+    if (customCandidates != NULL && !strstr(term,customCandidates->sentenceName))
        customCandidates = NULL;
 
     return false;
