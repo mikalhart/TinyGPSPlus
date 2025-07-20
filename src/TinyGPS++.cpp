@@ -30,6 +30,30 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define _RMCterm "RMC"
 #define _GGAterm "GGA"
 
+#ifndef ARDUINO
+// Enable use of this library on non-Arduino targets by defining symbols that are
+// normally provided by the Arduino standard headers (Arduino.h/WProgram.h).
+
+typedef uint8_t byte;
+
+
+#define _USE_MATH_DEFINES
+#include <cmath>
+
+#define PI           (M_PI)
+#define HALF_PI      (M_PI / 2.0)
+#define TWO_PI       (M_PI * 2.0)
+#define DEG_TO_RAD   (M_PI / 180.0)
+#define RAD_TO_DEG   (180.0 / M_PI)
+
+#define radians(deg) ((deg)*DEG_TO_RAD)
+#define degrees(rad) ((rad)*RAD_TO_DEG)
+#define sq(x)        ((x)*(x))
+
+
+#include <chrono>
+#endif  // !ARDUINO
+
 #if !defined(ARDUINO) && !defined(__AVR__)
 // Alternate implementation of millis() that relies on std
 unsigned long millis()

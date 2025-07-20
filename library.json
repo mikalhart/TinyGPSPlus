@@ -17,6 +17,9 @@
        "maintainer": true
     }
   ],
-  "frameworks": "arduino",
-  "platforms": "*"
+  "frameworks": "*",
+  "platforms": "*",
+  "build": {
+    "includeDir": "src"
+  }
 }
