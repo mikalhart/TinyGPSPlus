@@ -16,4 +16,6 @@ Like its predecessor, TinyGPS, this library provides compact and easy-to-use met
 
 However, TinyGPSPlus’s programmer interface is considerably simpler to use than TinyGPS, and the new library can extract arbitrary data from any of the myriad NMEA sentences out there, even proprietary ones.
 
+The [UsingZDA example](examples/UsingZDA/UsingZDA.ino) demonstrates extracting UTC time and a four-digit year from GPZDA and GNZDA sentences with `TinyGPSCustom`. It uses sample strings, so no GPS device is required.
+
 See [Arduiniana - TinyGPSPlus](http://arduiniana.org/libraries/tinygpsplus/) for more detailed information on how to use TinyGPSPlus.
