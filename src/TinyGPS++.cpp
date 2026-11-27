@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 #include <stdlib.h>
 
 #define _RMCterm "RMC"
@@ -385,6 +386,33 @@ double TinyGPSLocation::lng()
 
 void TinyGPSDate::commit()
 {
+   // get year when sketch is compiled ("Nov 27 2026" -> 2026)
+   const int compileYear = atoi(__DATE__ + 7);
+
+   uint32_t d = newDate / 10000;
+   uint32_t m = (newDate / 100) % 100;
+   uint32_t y = (newDate % 100) + 2000;
+
+   // apply 10bit wrap fix as long as we reach the current year
+   while ((d > 0) && (y < compileYear))
+   {
+      struct tm t = {0};
+      t.tm_year = y - 1900;
+      t.tm_mon  = m - 1;
+      t.tm_mday = d;
+      t.tm_hour = 12;
+
+      // add 1024 weeks (7168 days * seconds per day)
+      time_t epoch = mktime(&t) + (7168L * 86400L);
+      struct tm *fixed = gmtime(&epoch);
+
+      d = fixed->tm_mday;
+      m = fixed->tm_mon + 1;
+      y = fixed->tm_year + 1900;
+
+      newDate = d * 10000UL + m * 100UL + (y % 100);
+   }
+
    date = newDate;
    lastCommitTime = millis();
    valid = updated = true;
